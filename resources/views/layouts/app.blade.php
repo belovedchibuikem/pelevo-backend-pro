@@ -137,6 +137,7 @@
                     <a id="nav-how" href="{{ route('landing') }}#how-it-works" class="nav-link text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-teal-400 transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded" tabindex="0">How It Works</a>
                     <a id="nav-about" href="{{ route('landing') }}#about" class="nav-link text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-teal-400 transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded" tabindex="0">About</a>
                     <a id="nav-download" href="{{ route('landing') }}#download" class="nav-link text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-teal-400 transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded" tabindex="0">Download</a>
+                    <a id="nav-contact" href="{{ route('contact.show') }}" class="nav-link text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-teal-400 transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded" tabindex="0">Contact Us</a>
                     <!-- Dark Mode Toggle -->
                     <button @click="darkMode = !darkMode" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary" aria-label="Toggle dark mode">
                         <svg x-show="!darkMode" class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
@@ -164,6 +165,7 @@
                 <a id="mnav-how" href="{{ route('landing') }}#how-it-works" @click="mobileMenu = false" class="nav-link block text-lg text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-teal-400 transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded">How It Works</a>
                 <a id="mnav-about" href="{{ route('landing') }}#about" @click="mobileMenu = false" class="nav-link block text-lg text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-teal-400 transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded">About</a>
                 <a id="mnav-download" href="{{ route('landing') }}#download" @click="mobileMenu = false" class="nav-link block text-lg text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-teal-400 transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded">Download</a>
+                <a id="mnav-contact" href="{{ route('contact.show') }}" @click="mobileMenu = false" class="nav-link block text-lg text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-teal-400 transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded">Contact Us</a>
                 <button @click="darkMode = !darkMode" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary" aria-label="Toggle dark mode">
                     <svg x-show="!darkMode" class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
@@ -180,6 +182,58 @@
     <main>
         @yield('content')
     </main>
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <img src="{{ asset('public/storage/logo/logo.png') }}" alt="Pelevo Logo" height="200" width="200" />
+                    </div>
+                    <p class="text-gray-400 mb-6 max-w-md">
+                        Transform your podcast listening experience. Earn rewards while enjoying amazing content from creators around the world.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 4.557c-.883.392-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 2.567-1.645 0-2.861.967-2.861 2.168 0 1.029.653 2.567.992 2.567.348 0 1.029-.653 2.567-1.645 2.567z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Product</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition-colors">Features</a></li>
+                        <li><a href="#how-it-works" class="text-gray-400 hover:text-white transition-colors">How It Works</a></li>
+                        <li><a href="#download" class="text-gray-400 hover:text-white transition-colors">Download</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">About</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Legal</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{{ route('privacy') }}" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="{{ route('terms') }}" class="text-gray-400 hover:text-white transition-colors">Terms & Conditions</a></li>
+                        <li><a href="{{ route('cookie-policy') }}" class="text-gray-400 hover:text-white transition-colors">Cookie Policy</a></li>
+                        <li><a href="{{ route('gdpr') }}" class="text-gray-400 hover:text-white transition-colors">GDPR</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center">
+                <p class="text-gray-400">&copy; {{ date('Y') }} Pelevo. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
     <!-- Demo Modal -->
     <div x-show="showDemo" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center bg-black/60" style="display: none;">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-6 relative">
