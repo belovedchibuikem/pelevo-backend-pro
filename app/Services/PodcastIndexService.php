@@ -101,7 +101,7 @@ class PodcastIndexService
                     // If we get results, try to get a larger sample to estimate count
                     $samplePodcasts = $this->makeRequest('/podcasts/bycat', [
                         'cat' => $categoryId,
-                        'max' => 100, // Get up to 100 to estimate
+                        'max' => 1000, // Get up to 100 to estimate
                         'clean' => true
                     ]);
                     
@@ -130,7 +130,7 @@ class PodcastIndexService
     /**
      * Search podcasts by term
      */
-    public function searchPodcasts(string $term, int $max = 100): array
+    public function searchPodcasts(string $term, int $max = 1000): array
     {
         return $this->makeRequest('/search/byterm', [
             'q' => $term,
@@ -163,7 +163,7 @@ class PodcastIndexService
     /**
      * Get episodes by feed ID
      */
-    public function getEpisodesByFeedId(int $feedId, int $max = 100, int $since = null): array
+    public function getEpisodesByFeedId(int $feedId, int $max = 1000, int $since = 0): array
     {
         $params = [
             'id' => $feedId,
@@ -181,7 +181,7 @@ class PodcastIndexService
     /**
      * Get recent episodes across all podcasts
      */
-    public function getRecentEpisodes(int $max = 100, array $excludeString = [], array $before = []): array
+    public function getRecentEpisodes(int $max = 1000, array $excludeString = [], array $before = []): array
     {
         $params = [
             'max' => $max,
@@ -199,7 +199,7 @@ class PodcastIndexService
     /**
      * Get trending podcasts
      */
-    public function getTrendingPodcasts(int $max = 100, string $since = null, string $cat = null): array
+    public function getTrendingPodcasts(int $max = 1000, string $since = '', string $cat = ''): array
     {
         $params = [
             'max' => $max,
@@ -235,7 +235,7 @@ class PodcastIndexService
     /**
      * Get new podcasts
      */
-    public function getNewPodcasts(int $max = 100, string $since = null): array
+    public function getNewPodcasts(int $max = 1000, string $since = ''): array
     {
         $params = [
             'max' => $max,
@@ -267,7 +267,7 @@ class PodcastIndexService
     /**
      * Get popular podcasts
      */
-    public function getPopularPodcasts(int $max = 100): array
+    public function getPopularPodcasts(int $max = 1000): array
     {
         $cacheKey = 'popular_podcasts';
         try {
@@ -319,7 +319,7 @@ class PodcastIndexService
     /**
      * Get podcasts by category
      */
-    public function getPodcastsByCategory(string $category, int $max = 20, string $term): array
+    public function getPodcastsByCategory(string $category, int $max = 1000, string $term): array
     {
         return $this->makeRequest('/search/byterm', [
             'q'=>$term,
@@ -348,7 +348,7 @@ class PodcastIndexService
     /**
      * Get random podcasts
      */
-    public function getRandomPodcasts(int $max = 10, string $lang = null, string $cat = null): array
+    public function getRandomPodcasts(int $max = 1000, string $lang = '', string $cat = ''): array
     {
         $params = [
             'max' => $max,
@@ -369,7 +369,7 @@ class PodcastIndexService
     /**
      * Get podcasts for the True Crime category
      */
-    public function getTrueCrimePodcasts(int $max = 20): array
+    public function getTrueCrimePodcasts(int $max = 1000): array
     {
         $cacheKey = 'true_crime_podcasts_' . $max;
         try {
@@ -388,7 +388,7 @@ class PodcastIndexService
         }
     }
 
-    public function getSearchPodcastByCategory(int $max = 20, string $catId='', string $catName=''): array
+    public function getSearchPodcastByCategory(int $max = 1000, string $catId='', string $catName=''): array
     {
         $cacheKey = 'search_podcast_by_category_' . $max.$catId.$catName;
         try {
@@ -410,7 +410,7 @@ class PodcastIndexService
     /**
      * Get podcasts for the Health category
      */
-    public function getHealthPodcasts(int $max = 20): array
+    public function getHealthPodcasts(int $max = 1000): array
     {
         
         $cacheKey = 'health_podss';

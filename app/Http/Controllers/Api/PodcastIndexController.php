@@ -169,7 +169,7 @@ class PodcastIndexController extends Controller
         try {
             $results = $this->podcastIndexService->searchPodcasts(
                 $request->get('q'),
-                $request->get('max', 10)
+                $request->get('max', 1000)
             );
 
             return response()->json([
@@ -272,7 +272,7 @@ class PodcastIndexController extends Controller
 
         try {
             $results = $this->podcastIndexService->getSearchPodcastByCategory(
-                $request->get('max', 20),
+                $request->get('max', 1000),
                 $request->get('catId'),
                 $request->get('catName'),
 
