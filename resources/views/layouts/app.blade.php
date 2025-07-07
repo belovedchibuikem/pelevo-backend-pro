@@ -127,7 +127,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-2">
-                    <div class="h-20 w-20 flex items-center justify-center overflow-hidden">
+                    <div class="h-10 w-10 flex items-center justify-center overflow-hidden">
                         <img src="{{ asset('public/storage/logo/logo.png') }}" alt="Pelevo Logo" class="max-h-full max-w-full object-contain" height="200" width="200"/>
                     </div>
                     
