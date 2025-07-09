@@ -215,7 +215,7 @@ class PodcastIndexService
             $params['cat'] = $cat;
         }
 
-        $cacheKey = 'trending_podcasts_' . md5(serialize($params));
+        $cacheKey = 'trending_podcasts' .$max;
         try {
             return Cache::remember($cacheKey, 1800, function () use ($params) {
                 return $this->makeRequest('/podcasts/trending', $params);
@@ -247,7 +247,7 @@ class PodcastIndexService
             $params['since'] = $since;
         }
 
-        $cacheKey = 'new_podcasts_' . md5(serialize($params));
+        $cacheKey = 'new_podcasts' . md5(serialize($params));
         try {
             return Cache::remember($cacheKey, 1800, function () use ($params) {
                 return $this->makeRequest('/recent/feeds', $params);

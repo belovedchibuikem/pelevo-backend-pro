@@ -11,6 +11,7 @@ use App\Http\Controllers\Web\VerificationController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\ContactController;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,6 +26,16 @@ Route::get('/storage-link', function () {
 
     return 'The [public/storage] directory has been linked.';
 });
+
+// Clear all Laravel caches (config, route, view, application)
+Route::get('/clear-cache', function () {
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    return 'All caches (application, config, route, view) have been cleared!';
+})->name('clear.cache');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

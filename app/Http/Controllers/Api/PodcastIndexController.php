@@ -99,7 +99,7 @@ class PodcastIndexController extends Controller
     // 4. Trending podcasts
     public function trending()
     {
-        $podcasts = $this->podcastIndexService->getTrendingPodcasts(20);
+        $podcasts = $this->podcastIndexService->getTrendingPodcasts(1000);
         if (isset($podcasts['feeds']) && is_array($podcasts['feeds'])) {
             return response()->json($podcasts['feeds']);
         }
@@ -111,7 +111,7 @@ class PodcastIndexController extends Controller
     {
         try {
             Log::info('New episodes endpoint called');
-            $episodes = $this->podcastIndexService->getRecentEpisodes(20);
+            $episodes = $this->podcastIndexService->getRecentEpisodes(1000);
             Log::info('Raw episodes response: ' . json_encode($episodes));
             
             if (isset($episodes['items']) && is_array($episodes['items'])) {
@@ -188,7 +188,7 @@ class PodcastIndexController extends Controller
 
     public function newPodcasts()
     {
-        $podcasts = $this->podcastIndexService->getNewPodcasts(20);
+        $podcasts = $this->podcastIndexService->getNewPodcasts(1000);
         if (isset($podcasts['feeds']) && is_array($podcasts['feeds'])) {
             return response()->json($podcasts['feeds']);
         }
@@ -233,7 +233,7 @@ class PodcastIndexController extends Controller
      */
     public function trueCrime()
     {
-        $podcasts = $this->podcastIndexService->getTrueCrimePodcasts(20);
+        $podcasts = $this->podcastIndexService->getTrueCrimePodcasts(1000);
         if (isset($podcasts['feeds']) && is_array($podcasts['feeds'])) {
             return response()->json($podcasts['feeds']);
         }
@@ -245,7 +245,7 @@ class PodcastIndexController extends Controller
      */
     public function health()
     {
-        $podcasts = $this->podcastIndexService->getHealthPodcasts(20);
+        $podcasts = $this->podcastIndexService->getHealthPodcasts(1000);
         if (isset($podcasts['feeds']) && is_array($podcasts['feeds'])) {
             return response()->json($podcasts['feeds']);
         }
