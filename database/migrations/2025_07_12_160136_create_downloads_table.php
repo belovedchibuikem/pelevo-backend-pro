@@ -6,22 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::create('listening_history', function (Blueprint $table) {
+        Schema::create('downloads', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('episode_id')->constrained()->onDelete('cascade');
-            $table->integer('duration_listened');
-            $table->decimal('earnings', 10, 2)->default(0);
-            $table->string('ip_address');
-            $table->boolean('is_eligible_for_earnings')->default(true);
+            $table->string('file_path'); // Local storage path
+            $table->string('file_name');
+            $table->integer('file_size')->nullable();
+            $table->timestamp('downloaded_at')->nullable();
             $table->timestamps();
+            $table->unique(['user_id', 'episode_id']);
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('listening_history');
+        Schema::dropIfExists('downloads');
     }
-}; 
+};

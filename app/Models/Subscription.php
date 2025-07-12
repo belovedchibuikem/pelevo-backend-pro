@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Subscription extends Model
 {
@@ -12,23 +13,34 @@ class Subscription extends Model
     protected $fillable = [
         'user_id',
         'podcast_id',
-        'status',
-        'started_at',
-        'expires_at',
+        'subscribed_at',
+        'unsubscribed_at',
+        'is_active',
     ];
 
     protected $casts = [
-        'started_at' => 'datetime',
-        'expires_at' => 'datetime',
+        'subscribed_at' => 'datetime',
+        'unsubscribed_at' => 'datetime',
+        'is_active' => 'boolean',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function podcast()
+    public function podcast(): BelongsTo
     {
         return $this->belongsTo(Podcast::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
     }
 } 

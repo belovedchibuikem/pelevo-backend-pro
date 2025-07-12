@@ -100,6 +100,26 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(PodcastIndexSubscription::class);
     }
 
+    public function downloads()
+    {
+        return $this->hasMany(Download::class);
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function playHistories()
+    {
+        return $this->hasMany(PlayHistory::class);
+    }
+
+    public function playlists()
+    {
+        return $this->hasMany(Playlist::class);
+    }
+
     // Accessor for profile_image_url
     public function getProfileImageUrlAttribute($value)
     {

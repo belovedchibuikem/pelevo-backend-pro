@@ -52,6 +52,21 @@ class Episode extends Model
         return $this->hasMany(EpisodeNotification::class);
     }
 
+    public function downloads()
+    {
+        return $this->hasMany(Download::class);
+    }
+
+    public function playHistories()
+    {
+        return $this->hasMany(PlayHistory::class);
+    }
+
+    public function playlistItems()
+    {
+        return $this->hasMany(PlaylistItem::class);
+    }
+
     public function scopeNew($query)
     {
         return $query->where('is_new', true);

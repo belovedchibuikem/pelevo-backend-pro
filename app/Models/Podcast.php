@@ -63,9 +63,14 @@ class Podcast extends Model
         return $this->hasMany(Episode::class, 'feed_id', 'feed_id');
     }
 
-    public function subscriptions(): HasMany
+    public function subscriptions()
     {
-        return $this->hasMany(PodcastSubscription::class, 'feed_id', 'feed_id');
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function playlists()
+    {
+        return $this->belongsToMany(Playlist::class, 'playlist_items', 'episode_id', 'playlist_id');
     }
 
     public function subscribers(): BelongsToMany

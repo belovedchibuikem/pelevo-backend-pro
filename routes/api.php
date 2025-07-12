@@ -90,6 +90,37 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', [ProfileController::class, 'show']);
     Route::patch('profile', [ProfileController::class, 'update']);
     Route::delete('profile', [ProfileController::class, 'destroy']);
+
+    // Library routes
+    Route::prefix('library')->group(function () {
+        // Downloads
+        Route::apiResource('downloads', \App\Http\Controllers\Api\DownloadsController::class);
+        Route::post('downloads/batch-destroy', [\App\Http\Controllers\Api\DownloadsController::class, 'batchDestroy']);
+        Route::delete('downloads/clear-all', [\App\Http\Controllers\Api\DownloadsController::class, 'clearAll']);
+
+        // Subscriptions
+        Route::apiResource('subscriptions', \App\Http\Controllers\Api\SubscriptionsController::class);
+        Route::post('subscriptions/subscribe', [\App\Http\Controllers\Api\SubscriptionsController::class, 'subscribe']);
+        Route::post('subscriptions/unsubscribe', [\App\Http\Controllers\Api\SubscriptionsController::class, 'unsubscribe']);
+        Route::post('subscriptions/batch-destroy', [\App\Http\Controllers\Api\SubscriptionsController::class, 'batchDestroy']);
+
+        // Play History
+        Route::apiResource('play-history', \App\Http\Controllers\Api\PlayHistoryController::class);
+        Route::post('play-history/batch-destroy', [\App\Http\Controllers\Api\PlayHistoryController::class, 'batchDestroy']);
+        Route::delete('play-history/clear-all', [\App\Http\Controllers\Api\PlayHistoryController::class, 'clearAll']);
+        Route::get('play-history/recent', [\App\Http\Controllers\Api\PlayHistoryController::class, 'recent']);
+
+        // Playlists
+        Route::apiResource('playlists', \App\Http\Controllers\Api\PlaylistsController::class);
+        Route::post('playlists/{playlist}/add-episode', [\App\Http\Controllers\Api\PlaylistsController::class, 'addEpisode']);
+        Route::delete('playlists/{playlist}/remove-episode', [\App\Http\Controllers\Api\PlaylistsController::class, 'removeEpisode']);
+        Route::post('playlists/{playlist}/reorder', [\App\Http\Controllers\Api\PlaylistsController::class, 'reorder']);
+        Route::post('playlists/batch-destroy', [\App\Http\Controllers\Api\PlaylistsController::class, 'batchDestroy']);
+
+        // Playlist Items
+        Route::apiResource('playlist-items', \App\Http\Controllers\Api\PlaylistItemsController::class);
+        Route::post('playlist-items/batch-destroy', [\App\Http\Controllers\Api\PlaylistItemsController::class, 'batchDestroy']);
+    });
 });
 
 // Social Authentication Routes
