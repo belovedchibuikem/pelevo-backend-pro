@@ -98,25 +98,21 @@ class PlaylistsController extends Controller
         }
 
         $request->validate([
-            'episode_id' => 'required|exists:episodes,id'
+            'podcastindex_episode_id' => 'required|string'
         ]);
 
-        // Check if episode is already in playlist
-        $existingItem = $playlist->items()->where('episode_id', $request->episode_id)->first();
+        $existingItem = $playlist->items()->where('podcastindex_episode_id', $request->podcastindex_episode_id)->first();
         if ($existingItem) {
             return response()->json(['message' => 'Episode already in playlist'], 422);
         }
 
-        $order = $playlist->items()->max('order') + 1;
         $playlist->items()->create([
-            'episode_id' => $request->episode_id,
-            'order' => $order,
+            'podcastindex_episode_id' => $request->podcastindex_episode_id,
             'added_at' => now()
         ]);
 
         return response()->json([
             'message' => 'Episode added to playlist successfully',
-            'data' => new PlaylistResource($playlist->load(['items.episode.podcast']))
         ]);
     }
 
@@ -130,10 +126,10 @@ class PlaylistsController extends Controller
         }
 
         $request->validate([
-            'episode_id' => 'required|exists:episodes,id'
+            'podcastindex_episode_id' => 'required|string'
         ]);
 
-        $deletedCount = $playlist->items()->where('episode_id', $request->episode_id)->delete();
+        $deletedCount = $playlist->items()->where('podcastindex_episode_id', $request->podcastindex_episode_id)->delete();
 
         if ($deletedCount === 0) {
             return response()->json(['message' => 'Episode not found in playlist'], 404);

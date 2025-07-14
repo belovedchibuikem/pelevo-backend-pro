@@ -14,12 +14,10 @@ return new class extends Migration
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('podcast_id')->constrained()->onDelete('cascade');
+            $table->string('podcastindex_podcast_id'); // PodcastIndex podcast ID
             $table->timestamp('subscribed_at')->nullable();
-            $table->timestamp('unsubscribed_at')->nullable();
-            $table->boolean('is_active')->default(true);
             $table->timestamps();
-            $table->unique(['user_id', 'podcast_id']);
+            $table->unique(['user_id', 'podcastindex_podcast_id']);
         });
     }
 

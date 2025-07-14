@@ -29,13 +29,26 @@ class DownloadsController extends Controller
     /**
      * Store a newly created download.
      */
-    public function store(DownloadRequest $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
-        $download = $request->user()->downloads()->create($request->validated());
+        $request->validate([
+            'podcastindex_episode_id' => 'required|string',
+            'file_path' => 'required|string',
+        ]);
+
+        $download = $request->user()->downloads()->create([
+            'podcastindex_episode_id' => $request->podcastindex_episode_id,
+            'file_path' => $request->file_path,
+            'downloaded_at' => now(),
+        ]);
 
         return response()->json([
             'message' => 'Download added successfully',
-            'data' => new DownloadResource($download->load(['episode.podcast']))
+            'data' => [
+                'podcastindex_episode_id' => $download->podcastindex_episode_id,
+                'file_path' => $download->file_path,
+                'downloaded_at' => $download->downloaded_at
+            ]
         ], 201);
     }
 

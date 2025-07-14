@@ -14,12 +14,11 @@ return new class extends Migration
         Schema::create('play_history', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('episode_id')->constrained()->onDelete('cascade');
-            $table->integer('progress_seconds')->default(0); // How many seconds listened
-            $table->enum('status', ['played', 'paused', 'completed'])->default('played');
-            $table->timestamp('last_played_at')->nullable();
+            $table->string('podcastindex_episode_id');
+            $table->enum('status', ['played', 'paused'])->default('played');
+            $table->integer('position')->default(0); // playback position in seconds
             $table->timestamps();
-            $table->unique(['user_id', 'episode_id']);
+            $table->unique(['user_id', 'podcastindex_episode_id']);
         });
     }
 

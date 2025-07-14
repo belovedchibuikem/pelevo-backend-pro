@@ -12,16 +12,12 @@ class Subscription extends Model
 
     protected $fillable = [
         'user_id',
-        'podcast_id',
+        'podcastindex_podcast_id',
         'subscribed_at',
-        'unsubscribed_at',
-        'is_active',
     ];
 
     protected $casts = [
         'subscribed_at' => 'datetime',
-        'unsubscribed_at' => 'datetime',
-        'is_active' => 'boolean',
     ];
 
     public function user(): BelongsTo

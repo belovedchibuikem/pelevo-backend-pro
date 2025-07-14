@@ -66,4 +66,8 @@ return [
         'secret' => env('PODCASTINDEX_API_SECRET'),
     ],
 
+    'fcm' => [
+        'server_key' => env('FCM_SERVER_KEY'),
+    ],
+
 ];

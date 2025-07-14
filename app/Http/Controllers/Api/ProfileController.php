@@ -54,4 +54,16 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
         return response()->json(['success' => true, 'message' => 'Account deleted.']);
     }
+
+    // POST /api/profile/fcm-token
+    public function updateFcmToken(Request $request): JsonResponse
+    {
+        $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+        $user = $request->user();
+        $user->fcm_token = $request->fcm_token;
+        $user->save();
+        return response()->json(['success' => true, 'message' => 'FCM token updated.']);
+    }
 } 

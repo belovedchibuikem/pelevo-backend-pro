@@ -98,21 +98,22 @@ class SubscriptionsController extends Controller
     public function subscribe(Request $request): JsonResponse
     {
         $request->validate([
-            'podcast_id' => 'required|exists:podcasts,id'
+            'podcastindex_podcast_id' => 'required|string'
         ]);
 
         $subscription = $request->user()->subscriptions()->updateOrCreate(
-            ['podcast_id' => $request->podcast_id],
+            ['podcastindex_podcast_id' => $request->podcastindex_podcast_id],
             [
                 'subscribed_at' => now(),
-                'is_active' => true,
-                'unsubscribed_at' => null
             ]
         );
 
         return response()->json([
             'message' => 'Subscribed successfully',
-            'data' => new SubscriptionResource($subscription->load(['podcast']))
+            'data' => [
+                'podcastindex_podcast_id' => $subscription->podcastindex_podcast_id,
+                'subscribed_at' => $subscription->subscribed_at
+            ]
         ]);
     }
 
@@ -122,22 +123,19 @@ class SubscriptionsController extends Controller
     public function unsubscribe(Request $request): JsonResponse
     {
         $request->validate([
-            'podcast_id' => 'required|exists:podcasts,id'
+            'podcastindex_podcast_id' => 'required|string'
         ]);
 
         $subscription = $request->user()
             ->subscriptions()
-            ->where('podcast_id', $request->podcast_id)
+            ->where('podcastindex_podcast_id', $request->podcastindex_podcast_id)
             ->first();
 
         if (!$subscription) {
             return response()->json(['message' => 'Subscription not found'], 404);
         }
 
-        $subscription->update([
-            'is_active' => false,
-            'unsubscribed_at' => now()
-        ]);
+        $subscription->delete();
 
         return response()->json(['message' => 'Unsubscribed successfully']);
     }
