@@ -33,7 +33,7 @@ class PodcastIndexService
             'X-Auth-Date' => $apiHeaderTime,
             'X-Auth-Key' => $this->apiKey,
             'Authorization' => $sha1Hash,
-            'User-Agent' => config('app.name', 'Pelevo') . '/1.0'
+            'User-Agent' => config('app.name', 'Pelevo') . '/1.3'
         ];
     }
 
@@ -429,5 +429,18 @@ class PodcastIndexService
             }
             throw $e;
         }
+    }
+
+    /**
+     * Fetch podcast details by PodcastIndex feed ID (static helper for controller use)
+     */
+    public static function fetchPodcast($podcastindex_podcast_id)
+    {
+        $service = new self();
+        $result = $service->getPodcastById((int)$podcastindex_podcast_id);
+        if (isset($result['feed'])) {
+            return $result['feed'];
+        }
+        throw new \Exception('Podcast not found in PodcastIndex');
     }
 }

@@ -9,22 +9,40 @@ use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Models\Podcast;
+use App\Services\PodcastIndexService;
 
 class SubscriptionsController extends Controller
 {
     /**
+     * Helper for consistent error responses.
+     */
+    protected function errorResponse($message, $status = 400, $errors = null)
+    {
+        $response = ['message' => $message];
+        if ($errors) {
+            $response['errors'] = $errors;
+        }
+        return response()->json($response, $status);
+    }
+
+    /**
      * Display a listing of the user's subscriptions.
      */
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection|JsonResponse
     {
-        $subscriptions = $request->user()
-            ->subscriptions()
-            ->with(['podcast'])
-            ->active()
-            ->orderBy('subscribed_at', 'desc')
-            ->paginate(20);
+        try {
+            $subscriptions = $request->user()
+                ->subscriptions()
+                ->with(['podcast'])
+                ->active()
+                ->orderBy('subscribed_at', 'desc')
+                ->paginate(20);
 
-        return SubscriptionResource::collection($subscriptions);
+            return SubscriptionResource::collection($subscriptions);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to fetch subscriptions: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -32,16 +50,22 @@ class SubscriptionsController extends Controller
      */
     public function store(SubscriptionRequest $request): JsonResponse
     {
-        $data = $request->validated();
-        $data['subscribed_at'] = now();
-        $data['is_active'] = true;
+        try {
+            $data = $request->validated();
+            $data['subscribed_at'] = now();
+            $data['is_active'] = true;
 
-        $subscription = $request->user()->subscriptions()->create($data);
+            $subscription = $request->user()->subscriptions()->create($data);
 
-        return response()->json([
-            'message' => 'Subscribed successfully',
-            'data' => new SubscriptionResource($subscription->load(['podcast']))
-        ], 201);
+            return response()->json([
+                'message' => 'Subscribed successfully',
+                'data' => new SubscriptionResource($subscription->load(['podcast']))
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse('Validation failed', 422, $e->errors());
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to subscribe: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -49,13 +73,17 @@ class SubscriptionsController extends Controller
      */
     public function show(Request $request, Subscription $subscription): JsonResponse
     {
-        if ($subscription->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        try {
+            if ($subscription->user_id !== $request->user()->id) {
+                return $this->errorResponse('Unauthorized', 403);
+            }
 
-        return response()->json([
-            'data' => new SubscriptionResource($subscription->load(['podcast']))
-        ]);
+            return response()->json([
+                'data' => new SubscriptionResource($subscription->load(['podcast']))
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to fetch subscription: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -63,16 +91,22 @@ class SubscriptionsController extends Controller
      */
     public function update(SubscriptionRequest $request, Subscription $subscription): JsonResponse
     {
-        if ($subscription->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        try {
+            if ($subscription->user_id !== $request->user()->id) {
+                return $this->errorResponse('Unauthorized', 403);
+            }
+
+            $subscription->update($request->validated());
+
+            return response()->json([
+                'message' => 'Subscription updated successfully',
+                'data' => new SubscriptionResource($subscription->load(['podcast']))
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse('Validation failed', 422, $e->errors());
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to update subscription: ' . $e->getMessage(), 500);
         }
-
-        $subscription->update($request->validated());
-
-        return response()->json([
-            'message' => 'Subscription updated successfully',
-            'data' => new SubscriptionResource($subscription->load(['podcast']))
-        ]);
     }
 
     /**
@@ -80,16 +114,20 @@ class SubscriptionsController extends Controller
      */
     public function destroy(Request $request, Subscription $subscription): JsonResponse
     {
-        if ($subscription->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        try {
+            if ($subscription->user_id !== $request->user()->id) {
+                return $this->errorResponse('Unauthorized', 403);
+            }
+
+            $subscription->update([
+                'is_active' => false,
+                'unsubscribed_at' => now()
+            ]);
+
+            return response()->json(['message' => 'Unsubscribed successfully']);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to unsubscribe: ' . $e->getMessage(), 500);
         }
-
-        $subscription->update([
-            'is_active' => false,
-            'unsubscribed_at' => now()
-        ]);
-
-        return response()->json(['message' => 'Unsubscribed successfully']);
     }
 
     /**
@@ -97,24 +135,46 @@ class SubscriptionsController extends Controller
      */
     public function subscribe(Request $request): JsonResponse
     {
-        $request->validate([
-            'podcastindex_podcast_id' => 'required|string'
-        ]);
+        try {
+            $request->validate([
+                'podcastindex_podcast_id' => 'required|string'
+            ]);
 
-        $subscription = $request->user()->subscriptions()->updateOrCreate(
-            ['podcastindex_podcast_id' => $request->podcastindex_podcast_id],
-            [
-                'subscribed_at' => now(),
-            ]
-        );
+            // 1. Check if podcast exists locally
+            $podcast = Podcast::where('podcastindex_podcast_id', $request->podcastindex_podcast_id)->first();
 
-        return response()->json([
-            'message' => 'Subscribed successfully',
-            'data' => [
-                'podcastindex_podcast_id' => $subscription->podcastindex_podcast_id,
-                'subscribed_at' => $subscription->subscribed_at
-            ]
-        ]);
+            // 2. If not, fetch from PodcastIndex and store locally
+            if (!$podcast) {
+                $podcastData = PodcastIndexService::fetchPodcast($request->podcastindex_podcast_id);
+
+                // Adjust these fields to match your Podcast model
+                $podcast = Podcast::create([
+                    'podcastindex_podcast_id' => $podcastData['id'],
+                    'title' => $podcastData['title'] ?? 'Untitled',
+                    'description' => $podcastData['description'] ?? '',
+                    'author' => $podcastData['author'] ?? '',
+                    'image' => $podcastData['image'] ?? '',
+                    'episode_count' => $podcastData['episodeCount'] ?? 0,
+                    'categories' => $podcastData['categories'] ?? [],
+                    // Add any other fields your model requires
+                ]);
+            }
+
+            // 3. Create or update the subscription
+            $subscription = $request->user()->subscriptions()->updateOrCreate(
+                ['podcast_id' => $podcast->id],
+                ['subscribed_at' => now()]
+            );
+
+            return response()->json([
+                'message' => 'Subscribed successfully',
+                'data' => new SubscriptionResource($subscription->load(['podcast']))
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse('Validation failed', 422, $e->errors());
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to subscribe: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -122,22 +182,28 @@ class SubscriptionsController extends Controller
      */
     public function unsubscribe(Request $request): JsonResponse
     {
-        $request->validate([
-            'podcastindex_podcast_id' => 'required|string'
-        ]);
+        try {
+            $request->validate([
+                'podcastindex_podcast_id' => 'required|string'
+            ]);
 
-        $subscription = $request->user()
-            ->subscriptions()
-            ->where('podcastindex_podcast_id', $request->podcastindex_podcast_id)
-            ->first();
+            $subscription = $request->user()
+                ->subscriptions()
+                ->where('podcastindex_podcast_id', $request->podcastindex_podcast_id)
+                ->first();
 
-        if (!$subscription) {
-            return response()->json(['message' => 'Subscription not found'], 404);
+            if (!$subscription) {
+                return $this->errorResponse('Subscription not found', 404);
+            }
+
+            $subscription->delete();
+
+            return response()->json(['message' => 'Unsubscribed successfully']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse('Validation failed', 422, $e->errors());
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to unsubscribe: ' . $e->getMessage(), 500);
         }
-
-        $subscription->delete();
-
-        return response()->json(['message' => 'Unsubscribed successfully']);
     }
 
     /**
@@ -145,21 +211,27 @@ class SubscriptionsController extends Controller
      */
     public function batchDestroy(Request $request): JsonResponse
     {
-        $request->validate([
-            'subscription_ids' => 'required|array',
-            'subscription_ids.*' => 'exists:subscriptions,id'
-        ]);
-
-        $updatedCount = $request->user()
-            ->subscriptions()
-            ->whereIn('id', $request->subscription_ids)
-            ->update([
-                'is_active' => false,
-                'unsubscribed_at' => now()
+        try {
+            $request->validate([
+                'subscription_ids' => 'required|array',
+                'subscription_ids.*' => 'exists:subscriptions,id'
             ]);
 
-        return response()->json([
-            'message' => "Successfully unsubscribed from {$updatedCount} podcasts"
-        ]);
+            $updatedCount = $request->user()
+                ->subscriptions()
+                ->whereIn('id', $request->subscription_ids)
+                ->update([
+                    'is_active' => false,
+                    'unsubscribed_at' => now()
+                ]);
+
+            return response()->json([
+                'message' => "Successfully unsubscribed from {$updatedCount} podcasts"
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse('Validation failed', 422, $e->errors());
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to batch unsubscribe: ' . $e->getMessage(), 500);
+        }
     }
 }
