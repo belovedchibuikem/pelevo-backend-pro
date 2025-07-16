@@ -141,7 +141,7 @@ class SubscriptionsController extends Controller
             ]);
 
             // 1. Check if podcast exists locally
-            $podcast = Podcast::where('podcastindex_podcast_id', $request->podcastindex_podcast_id)->first();
+            $podcast = Podcast::where('id', $request->podcastindex_podcast_id)->first();
 
             // 2. If not, fetch from PodcastIndex and store locally
             if (!$podcast) {
@@ -149,20 +149,46 @@ class SubscriptionsController extends Controller
 
                 // Adjust these fields to match your Podcast model
                 $podcast = Podcast::create([
-                    'podcastindex_podcast_id' => $podcastData['id'],
+                    'id' => $podcastData['id'],
                     'title' => $podcastData['title'] ?? 'Untitled',
+                    'url' => $podcastData['url'] ?? null,
+                    'original_url' => $podcastData['originalUrl'] ?? null,
+                    'link' => $podcastData['link'] ?? null,
                     'description' => $podcastData['description'] ?? '',
                     'author' => $podcastData['author'] ?? '',
-                    'image' => $podcastData['image'] ?? '',
-                    'episode_count' => $podcastData['episodeCount'] ?? 0,
+                    'owner_name' => $podcastData['ownerName'] ?? null,
+                    'image' => $podcastData['image'] ?? null,
+                    'artwork' => $podcastData['artwork'] ?? null,
+                    'last_update_time' => $podcastData['lastUpdateTime'] ?? null,
+                    'last_crawl_time' => $podcastData['lastCrawlTime'] ?? null,
+                    'last_parse_time' => $podcastData['lastParseTime'] ?? null,
+                    'in_polling_queue' => $podcastData['inPollingQueue'] ?? false,
+                    'priority' => $podcastData['priority'] ?? null,
+                    'last_good_http_status_time' => $podcastData['lastGoodHttpStatusTime'] ?? null,
+                    'last_http_status' => $podcastData['lastHttpStatus'] ?? null,
+                    'content_type' => $podcastData['contentType'] ?? null,
+                    'itunes_id' => $podcastData['itunesId'] ?? null,
+                    'generator' => $podcastData['generator'] ?? null,
+                    'language' => $podcastData['language'] ?? null,
+                    'type' => $podcastData['type'] ?? null,
+                    'dead' => $podcastData['dead'] ?? false,
+                    'crawl_errors' => $podcastData['crawlErrors'] ?? 0,
+                    'parse_errors' => $podcastData['parseErrors'] ?? 0,
                     'categories' => $podcastData['categories'] ?? [],
-                    // Add any other fields your model requires
+                    'locked' => $podcastData['locked'] ?? false,
+                    'explicit' => $podcastData['explicit'] ?? false,
+                    'podcast_guid' => $podcastData['podcastGuid'] ?? null,
+                    'medium' => $podcastData['medium'] ?? null,
+                    'episode_count' => $podcastData['episodeCount'] ?? 0,
+                    'image_url_hash' => $podcastData['imageUrlHash'] ?? null,
+                    'newest_item_pubdate' => $podcastData['newestItemPubdate'] ?? null,
                 ]);
             }
 
             // 3. Create or update the subscription
             $subscription = $request->user()->subscriptions()->updateOrCreate(
                 ['podcast_id' => $podcast->id],
+                ['is_active' => true],
                 ['subscribed_at' => now()]
             );
 
