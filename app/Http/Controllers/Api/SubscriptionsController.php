@@ -187,7 +187,7 @@ class SubscriptionsController extends Controller
 
             // 3. Create or update the subscription
             $subscription = $request->user()->subscriptions()->updateOrCreate(
-                ['podcast_id' => $podcast->id],
+                ['podcast_id' => $podcastData['id']],
                 ['is_active' => true],
                 ['subscribed_at' => now()]
             );

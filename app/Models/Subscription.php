@@ -12,9 +12,11 @@ class Subscription extends Model
 
     protected $fillable = [
         'user_id',
-        'podcastindex_podcast_id',
+        'is_active',
+        'podcast_id',
         'subscribed_at',
     ];
+
 
     protected $casts = [
         'subscribed_at' => 'datetime',
