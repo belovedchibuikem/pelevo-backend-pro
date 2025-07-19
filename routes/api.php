@@ -104,6 +104,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('subscriptions/subscribe', [\App\Http\Controllers\Api\SubscriptionsController::class, 'subscribe']);
         Route::post('subscriptions/unsubscribe', [\App\Http\Controllers\Api\SubscriptionsController::class, 'unsubscribe']);
         Route::post('subscriptions/batch-destroy', [\App\Http\Controllers\Api\SubscriptionsController::class, 'batchDestroy']);
+        Route::get('subscriptions/ids', [\App\Http\Controllers\Api\SubscriptionsController::class, 'userSubscribedPodcastIds'])->middleware('auth:api');
 
         // Play History
         Route::apiResource('play-history', \App\Http\Controllers\Api\PlayHistoryController::class);

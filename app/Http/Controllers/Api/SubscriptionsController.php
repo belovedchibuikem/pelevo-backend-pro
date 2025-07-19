@@ -260,4 +260,32 @@ class SubscriptionsController extends Controller
             return $this->errorResponse('Failed to batch unsubscribe: ' . $e->getMessage(), 500);
         }
     }
+
+    /**
+     * Get all active podcast subscriptions for the authenticated user (for initial sync).
+     * Returns a flat array of podcast IDs (and optionally titles/images).
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function userSubscribedPodcastIds(Request $request)
+    {
+        $user = $request->user();
+        $subscriptions = $user->subscriptions()
+            ->active()
+            ->with('podcast')
+            ->get();
+
+        $result = $subscriptions->map(function ($sub) {
+            return [
+                'podcast_id' => $sub->podcast_id,
+                'title' => $sub->podcast->title ?? null,
+                'image' => $sub->podcast->image ?? null,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $result,
+        ]);
+    }
 }
