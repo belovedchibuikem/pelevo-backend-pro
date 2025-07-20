@@ -28,9 +28,6 @@ class SocialAuthController extends Controller
                 [
                     'name' => $googleUser->name,
                     'google_id' => $googleUser->id,
-                    'provider' => 'google',
-                    'provider_id' => $googleUser->id,
-                    'profile_image_url' => $googleUser->avatar ?? null,
                     'password' => Hash::make(Str::random(24)),
                     'email_verified_at' => now(),
                 ]
@@ -38,10 +35,10 @@ class SocialAuthController extends Controller
 
             $token = $user->createToken('google-auth')->plainTextToken;
 
-            // Redirect to app deep link with token and user data
-            $userJson = urlencode(json_encode($user->only(['id','name','email','profile_image_url','google_id','apple_id','provider','provider_id'])));
-            $redirectUrl = "pelevo://auth-callback?token={$token}&user={$userJson}";
-            return redirect()->away($redirectUrl);
+            return response()->json([
+                'token' => $token,
+                'user' => $user,
+            ]);
         } catch (\Exception $e) {
             Log::error('Google authentication error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to authenticate with Google'], 500);
@@ -63,9 +60,6 @@ class SocialAuthController extends Controller
                 [
                     'name' => $appleUser->name ?? explode('@', $appleUser->email)[0],
                     'apple_id' => $appleUser->id,
-                    'provider' => 'apple',
-                    'provider_id' => $appleUser->id,
-                    'profile_image_url' => $appleUser->avatar ?? null,
                     'password' => Hash::make(Str::random(24)),
                     'email_verified_at' => now(),
                 ]
@@ -73,10 +67,10 @@ class SocialAuthController extends Controller
 
             $token = $user->createToken('apple-auth')->plainTextToken;
 
-            // Redirect to app deep link with token and user data
-            $userJson = urlencode(json_encode($user->only(['id','name','email','profile_image_url','google_id','apple_id','provider','provider_id'])));
-            $redirectUrl = "pelevo://auth-callback?token={$token}&user={$userJson}";
-            return redirect()->away($redirectUrl);
+            return response()->json([
+                'token' => $token,
+                'user' => $user,
+            ]);
         } catch (\Exception $e) {
             Log::error('Apple authentication error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to authenticate with Apple'], 500);

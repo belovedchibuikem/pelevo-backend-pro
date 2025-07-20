@@ -150,15 +150,15 @@ class SubscriptionsController extends Controller
                 // Adjust these fields to match your Podcast model
                 $podcast = Podcast::create([
                     'id' => $podcastData['id'],
-                    'title' => isset($podcastData['title']) ? substr($podcastData['title'], 0, 255) : 'Untitled',
-                    'url' => isset($podcastData['url']) ? substr($podcastData['url'], 0, 255) : null,
-                    'original_url' => isset($podcastData['originalUrl']) ? substr($podcastData['originalUrl'], 0, 255) : null,
-                    'link' => isset($podcastData['link']) ? substr($podcastData['link'], 0, 255) : null,
-                    'description' => isset($podcastData['description']) ? substr($podcastData['description'], 0, 65535) : '', // text field
-                    'author' => isset($podcastData['author']) ? substr($podcastData['author'], 0, 255) : '',
-                    'owner_name' => isset($podcastData['ownerName']) ? substr($podcastData['ownerName'], 0, 255) : null,
-                    'image' => isset($podcastData['image']) ? substr($podcastData['image'], 0, 255) : null,
-                    'artwork' => isset($podcastData['artwork']) ? substr($podcastData['artwork'], 0, 255) : null,
+                    'title' => $podcastData['title'] ?? 'Untitled',
+                    'url' => $podcastData['url'] ?? null,
+                    'original_url' => $podcastData['originalUrl'] ?? null,
+                    'link' => $podcastData['link'] ?? null,
+                    'description' => $podcastData['description'] ?? '',
+                    'author' => $podcastData['author'] ?? '',
+                    'owner_name' => $podcastData['ownerName'] ?? null,
+                    'image' => $podcastData['image'] ?? null,
+                    'artwork' => $podcastData['artwork'] ?? null,
                     'last_update_time' => $podcastData['lastUpdateTime'] ?? null,
                     'last_crawl_time' => $podcastData['lastCrawlTime'] ?? null,
                     'last_parse_time' => $podcastData['lastParseTime'] ?? null,
@@ -166,10 +166,10 @@ class SubscriptionsController extends Controller
                     'priority' => $podcastData['priority'] ?? null,
                     'last_good_http_status_time' => $podcastData['lastGoodHttpStatusTime'] ?? null,
                     'last_http_status' => $podcastData['lastHttpStatus'] ?? null,
-                    'content_type' => isset($podcastData['contentType']) ? substr($podcastData['contentType'], 0, 255) : null,
+                    'content_type' => $podcastData['contentType'] ?? null,
                     'itunes_id' => $podcastData['itunesId'] ?? null,
-                    'generator' => isset($podcastData['generator']) ? substr($podcastData['generator'], 0, 255) : null,
-                    'language' => isset($podcastData['language']) ? substr($podcastData['language'], 0, 10) : null,
+                    'generator' => $podcastData['generator'] ?? null,
+                    'language' => $podcastData['language'] ?? null,
                     'type' => $podcastData['type'] ?? null,
                     'dead' => $podcastData['dead'] ?? false,
                     'crawl_errors' => $podcastData['crawlErrors'] ?? 0,
@@ -177,8 +177,8 @@ class SubscriptionsController extends Controller
                     'categories' => $podcastData['categories'] ?? [],
                     'locked' => $podcastData['locked'] ?? false,
                     'explicit' => $podcastData['explicit'] ?? false,
-                    'podcast_guid' => isset($podcastData['podcastGuid']) ? substr($podcastData['podcastGuid'], 0, 255) : null,
-                    'medium' => isset($podcastData['medium']) ? substr($podcastData['medium'], 0, 255) : null,
+                    'podcast_guid' => $podcastData['podcastGuid'] ?? null,
+                    'medium' => $podcastData['medium'] ?? null,
                     'episode_count' => $podcastData['episodeCount'] ?? 0,
                     'image_url_hash' => $podcastData['imageUrlHash'] ?? null,
                     'newest_item_pubdate' => $podcastData['newestItemPubdate'] ?? null,
@@ -259,33 +259,5 @@ class SubscriptionsController extends Controller
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to batch unsubscribe: ' . $e->getMessage(), 500);
         }
-    }
-
-    /**
-     * Get all active podcast subscriptions for the authenticated user (for initial sync).
-     * Returns a flat array of podcast IDs (and optionally titles/images).
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function userSubscribedPodcastIds(Request $request)
-    {
-        $user = $request->user();
-        $subscriptions = $user->subscriptions()
-            ->active()
-            ->with('podcast')
-            ->get();
-
-        $result = $subscriptions->map(function ($sub) {
-            return [
-                'podcast_id' => $sub->podcast_id,
-                'title' => $sub->podcast->title ?? null,
-                'image' => $sub->podcast->image ?? null,
-            ];
-        });
-
-        return response()->json([
-            'success' => true,
-            'data' => $result,
-        ]);
     }
 }

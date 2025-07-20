@@ -67,8 +67,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('earnings/by-podcast/{podcastId}', [EarningController::class, 'getEarningsByPodcast']);
     Route::get('listening-history', [EarningController::class, 'getListeningHistory']);
     Route::apiResource('earnings', EarningController::class)->only(['index', 'show']);
-    
-    Route::get('subscriptions/ids', [\App\Http\Controllers\Api\SubscriptionsController::class, 'userSubscribedPodcastIds']);
+
     // Withdrawals
     Route::post('withdraw', [WithdrawalController::class, 'withdraw']);
     Route::get('withdrawals', [WithdrawalController::class, 'index']);
@@ -105,7 +104,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('subscriptions/subscribe', [\App\Http\Controllers\Api\SubscriptionsController::class, 'subscribe']);
         Route::post('subscriptions/unsubscribe', [\App\Http\Controllers\Api\SubscriptionsController::class, 'unsubscribe']);
         Route::post('subscriptions/batch-destroy', [\App\Http\Controllers\Api\SubscriptionsController::class, 'batchDestroy']);
-        
 
         // Play History
         Route::apiResource('play-history', \App\Http\Controllers\Api\PlayHistoryController::class);

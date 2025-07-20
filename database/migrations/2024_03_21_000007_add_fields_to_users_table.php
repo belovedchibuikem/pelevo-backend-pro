@@ -10,10 +10,6 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('google_id')->nullable();
-            $table->string('apple_id')->nullable();
-            $table->string('provider')->nullable();
-            $table->string('provider_id')->nullable();
-            $table->string('avatar')->nullable();
             $table->string('device_id')->nullable()->unique();
             $table->string('device_name')->nullable();
             $table->string('country')->nullable();
@@ -33,10 +29,6 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
                 'google_id',
-                'apple_id',
-                'provider',
-                'provider_id',
-                'avatar',
                 'device_id',
                 'device_name',
                 'country',
