@@ -33,7 +33,7 @@ class PodcastIndexService
             'X-Auth-Date' => $apiHeaderTime,
             'X-Auth-Key' => $this->apiKey,
             'Authorization' => $sha1Hash,
-            'User-Agent' => config('app.name', 'Pelevo') . '/1.3'
+            'User-Agent' => config('app.name', 'Pelevo')
         ];
     }
 
