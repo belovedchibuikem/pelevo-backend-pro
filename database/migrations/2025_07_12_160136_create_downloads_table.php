@@ -14,13 +14,11 @@ return new class extends Migration
         Schema::create('downloads', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('episode_id')->constrained()->onDelete('cascade');
+            $table->string('podcastindex_episode_id'); // PodcastIndex episode ID
             $table->string('file_path'); // Local storage path
-            $table->string('file_name');
-            $table->integer('file_size')->nullable();
             $table->timestamp('downloaded_at')->nullable();
             $table->timestamps();
-            $table->unique(['user_id', 'episode_id']);
+            $table->unique(['user_id', 'podcastindex_episode_id']);
         });
     }
 

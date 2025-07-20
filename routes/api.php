@@ -90,6 +90,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', [ProfileController::class, 'show']);
     Route::patch('profile', [ProfileController::class, 'update']);
     Route::delete('profile', [ProfileController::class, 'destroy']);
+    Route::post('profile/fcm-token', [ProfileController::class, 'updateFcmToken']);
 
     // Library routes
     Route::prefix('library')->group(function () {

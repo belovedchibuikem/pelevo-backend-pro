@@ -37,6 +37,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'profile_image_url',
         'subscribed_categories',
         'balance',
+        'fcm_token',
     ];
 
     /**

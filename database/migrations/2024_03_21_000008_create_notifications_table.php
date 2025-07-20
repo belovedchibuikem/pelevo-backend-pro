@@ -15,6 +15,8 @@ return new class extends Migration
             $table->string('title');
             $table->text('message');
             $table->json('data')->nullable();
+            $table->string('podcastindex_podcast_id')->nullable();
+            $table->string('podcastindex_episode_id')->nullable();
             $table->boolean('is_read')->default(false);
             $table->timestamp('read_at')->nullable();
             $table->timestamps();

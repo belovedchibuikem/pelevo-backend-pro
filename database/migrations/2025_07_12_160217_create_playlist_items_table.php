@@ -14,11 +14,10 @@ return new class extends Migration
         Schema::create('playlist_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('playlist_id')->constrained()->onDelete('cascade');
-            $table->foreignId('episode_id')->constrained()->onDelete('cascade');
-            $table->integer('order')->default(0); // For reordering within playlist
+            $table->string('podcastindex_episode_id');
             $table->timestamp('added_at')->nullable();
             $table->timestamps();
-            $table->unique(['playlist_id', 'episode_id']);
+            $table->unique(['playlist_id', 'podcastindex_episode_id']);
         });
     }
 

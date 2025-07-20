@@ -5,13 +5,17 @@ namespace App\Services;
 use App\Models\PodcastNotification;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewEpisodeNotificationMail;
+use Google\Auth\OAuth2;
 
 class NotificationService
 {
     public function createNewEpisodeNotification(User $user, array $episode, string $showId, string $showName): void
     {
         try {
-            PodcastNotification::create([
+            $notification = PodcastNotification::create([
                 'user_id' => $user->id,
                 'type' => 'new_episode',
                 'title' => 'New Episode Available',
@@ -25,6 +29,25 @@ class NotificationService
                 'episode_id' => $episode['id'],
                 'is_read' => false
             ]);
+            if ($user->fcm_token) {
+                $this->sendFcmPush($user->fcm_token, $notification->title, $notification->message, [
+                    'id' => $notification->id,
+                    'type' => $notification->type,
+                    'title' => $notification->title,
+                    'message' => $notification->message,
+                    'data' => $notification->data,
+                    'show_id' => $showId,
+                    'episode_id' => $episode['id'],
+                ]);
+            }
+            // Send email notification
+            if ($user->email) {
+                try {
+                    Mail::to($user->email)->queue(new NewEpisodeNotificationMail($user, $episode, $showName));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send new episode email: ' . $e->getMessage());
+                }
+            }
         } catch (\Exception $e) {
             Log::error("Failed to create new episode notification: " . $e->getMessage());
         }
@@ -83,5 +106,45 @@ class NotificationService
         return PodcastNotification::where('user_id', $user->id)
             ->where('is_read', false)
             ->count();
+    }
+
+    private function sendFcmPush(string $token, string $title, string $body, array $data = []): void
+    {
+        $serviceAccountPath = config('services.fcm.service_account_path');
+        $projectId = config('services.fcm.project_id');
+        if (!file_exists(base_path($serviceAccountPath))) {
+            Log::error('FCM service account file not found.');
+            return;
+        }
+        $serviceAccount = json_decode(file_get_contents(base_path($serviceAccountPath)), true);
+        // Get OAuth2 access token
+        $client = new OAuth2([
+            'audience' => 'https://oauth2.googleapis.com/token',
+            'issuer' => $serviceAccount['client_email'],
+            'signingAlgorithm' => 'RS256',
+            'signingKey' => $serviceAccount['private_key'],
+            'scope' => 'https://www.googleapis.com/auth/firebase.messaging',
+        ]);
+        $accessToken = $client->fetchAuthToken()['access_token'] ?? null;
+        if (!$accessToken) {
+            Log::error('Failed to get FCM OAuth2 access token.');
+            return;
+        }
+        $url = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
+        $payload = [
+            'message' => [
+                'token' => $token,
+                'notification' => [
+                    'title' => $title,
+                    'body' => $body,
+                ],
+                'data' => $data,
+            ],
+        ];
+        $response = Http::withToken($accessToken)
+            ->post($url, $payload);
+        if ($response->failed()) {
+            Log::error('Failed to send FCM v1 push: ' . $response->body());
+        }
     }
 }

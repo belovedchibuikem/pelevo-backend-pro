@@ -1,63 +1,74 @@
 <?php
 
-// App/Models/Podcast.php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Podcast extends Model
 {
-    use HasFactory;
+    protected $table = 'podcasts';
+    public $incrementing = false;
+    protected $keyType = 'int';
 
     protected $fillable = [
-        'feed_id',
+        'id',
         'title',
+        'url',
+        'original_url',
+        'link',
         'description',
         'author',
+        'owner_name',
         'image',
         'artwork',
-        'feed_url',
-        'website_url',
-        'language',
-        'categories',
-        'explicit',
-        'episode_count',
         'last_update_time',
         'last_crawl_time',
         'last_parse_time',
+        'in_polling_queue',
+        'priority',
         'last_good_http_status_time',
         'last_http_status',
         'content_type',
-        'itunesId',
-        'originalUrl',
-        'link',
+        'itunes_id',
+        'generator',
+        'language',
+        'type',
         'dead',
         'crawl_errors',
         'parse_errors',
+        'categories',
         'locked',
+        'explicit',
+        'podcast_guid',
+        'medium',
+        'episode_count',
         'image_url_hash',
-        'newest_item_pub_date',
-        'is_featured',
-        'trending_score',
-        'popularity_score'
+        'newest_item_pubdate',
     ];
 
     protected $casts = [
-        'categories' => 'array',
-        'explicit' => 'boolean',
+        'id' => 'integer',
+        'last_update_time' => 'integer',
+        'last_crawl_time' => 'integer',
+        'last_parse_time' => 'integer',
+        'in_polling_queue' => 'boolean',
+        'priority' => 'integer',
+        'last_good_http_status_time' => 'integer',
+        'last_http_status' => 'integer',
+        'itunes_id' => 'integer',
+        'type' => 'integer',
         'dead' => 'boolean',
+        'crawl_errors' => 'integer',
+        'parse_errors' => 'integer',
+        'categories' => 'array',
         'locked' => 'boolean',
-        'is_featured' => 'boolean',
-        'last_update_time' => 'datetime',
-        'last_crawl_time' => 'datetime',
-        'last_parse_time' => 'datetime',
-        'last_good_http_status_time' => 'datetime',
-        'newest_item_pub_date' => 'datetime',
+        'explicit' => 'boolean',
+        'episode_count' => 'integer',
+        'image_url_hash' => 'integer',
+        'newest_item_pubdate' => 'integer',
     ];
-
     public function episodes(): HasMany
     {
         return $this->hasMany(Episode::class, 'feed_id', 'feed_id');

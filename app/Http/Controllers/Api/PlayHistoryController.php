@@ -31,23 +31,26 @@ class PlayHistoryController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'episode_id' => 'required|exists:episodes,id',
-            'progress_seconds' => 'required|integer|min:0',
-            'status' => 'required|in:played,paused,completed'
+            'podcastindex_episode_id' => 'required|string',
+            'status' => 'required|in:played,paused',
+            'position' => 'required|integer|min:0',
         ]);
 
         $playHistory = $request->user()->playHistories()->updateOrCreate(
-            ['episode_id' => $request->episode_id],
+            ['podcastindex_episode_id' => $request->podcastindex_episode_id],
             [
-                'progress_seconds' => $request->progress_seconds,
                 'status' => $request->status,
-                'last_played_at' => now()
+                'position' => $request->position,
             ]
         );
 
         return response()->json([
             'message' => 'Play history updated successfully',
-            'data' => new PlayHistoryResource($playHistory->load(['episode.podcast']))
+            'data' => [
+                'podcastindex_episode_id' => $playHistory->podcastindex_episode_id,
+                'status' => $playHistory->status,
+                'position' => $playHistory->position
+            ]
         ], 201);
     }
 

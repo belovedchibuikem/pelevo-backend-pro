@@ -12,34 +12,48 @@ class Episode extends Model
     use HasFactory;
 
     protected $fillable = [
-        'episode_id',
-        'feed_id',
+        'id',
         'title',
-        'description',
         'link',
+        'description',
         'guid',
-        'pub_date',
+        'date_published',
+        'date_published_pretty',
+        'date_crawled',
+        'enclosure_url',
+        'enclosure_type',
+        'enclosure_length',
         'duration',
         'explicit',
         'episode',
         'episode_type',
         'season',
         'image',
+        'feed_itunes_id',
+        'feed_url',
         'feed_image',
-        'feed_title',
+        'feed_id',
+        'podcast_guid',
         'feed_language',
-        'chaptersUrl',
-        'transcriptUrl',
-        'enclosureUrl',
-        'enclosureType',
-        'enclosureLength',
-        'is_new'
+        'feed_dead',
+        'feed_duplicate_of',
+        'chapters_url',
+        'transcript_url',
     ];
 
     protected $casts = [
-        'pub_date' => 'datetime',
+        'id' => 'integer',
+        'date_published' => 'integer',
+        'date_crawled' => 'integer',
+        'enclosure_length' => 'integer',
+        'duration' => 'integer',
         'explicit' => 'boolean',
-        'is_new' => 'boolean',
+        'episode' => 'integer',
+        'season' => 'integer',
+        'feed_itunes_id' => 'integer',
+        'feed_id' => 'integer',
+        'feed_dead' => 'boolean',
+        'feed_duplicate_of' => 'integer',
     ];
 
     public function podcast(): BelongsTo
@@ -67,10 +81,7 @@ class Episode extends Model
         return $this->hasMany(PlaylistItem::class);
     }
 
-    public function scopeNew($query)
-    {
-        return $query->where('is_new', true);
-    }
+
 
     public function scopeRecent($query, $days = 7)
     {

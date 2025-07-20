@@ -13,6 +13,8 @@ class Notification extends Model
         'title',
         'message',
         'data',
+        'podcastindex_podcast_id',
+        'podcastindex_episode_id',
         'is_read',
         'read_at',
     ];

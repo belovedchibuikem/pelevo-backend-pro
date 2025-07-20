@@ -216,7 +216,21 @@ class PodcastIndexController extends Controller
         return response()->json(['message' => 'Unsubscribed successfully.', 'deleted' => $deleted]);
     }
 
-    // 9. Notifications for new episodes
+    // 9. Get user's PodcastIndex subscriptions
+    public function getUserSubscriptions(Request $request)
+    {
+        $user = $request->user();
+        $subscriptions = $user->podcastIndexSubscriptions()
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return response()->json([
+            'success' => true,
+            'data' => $subscriptions
+        ]);
+    }
+
+    // 10. Notifications for new episodes
     public function notifications(Request $request)
     {
         $user = $request->user();

@@ -2,9 +2,9 @@
 // app/Jobs/CheckNewEpisodesJob.php
 namespace App\Jobs;
 
-use App\Models\PodcastSubscription;
-use App\Models\PodcastNotification;
-use App\Services\SpotifyService;
+use App\Models\Subscription;
+use App\Models\Notification;
+use App\Services\PodcastIndexService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -16,74 +16,64 @@ class CheckNewEpisodesJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function handle(SpotifyService $spotifyService): void
+    public function handle(PodcastIndexService $podcastIndexService): void
     {
         try {
-            $subscriptions = PodcastSubscription::where('is_active', true)
-                ->where('notify_new_episodes', true)
-                ->groupBy('show_id')
+            $subscriptions = Subscription::query()
+                ->select('podcastindex_podcast_id')
+                ->distinct()
                 ->get();
 
             foreach ($subscriptions as $subscription) {
-                $this->checkForNewEpisodes($subscription, $spotifyService);
+                $this->checkForNewEpisodes($subscription->podcastindex_podcast_id, $podcastIndexService);
             }
         } catch (\Exception $e) {
             Log::error('Error checking for new episodes: ' . $e->getMessage());
         }
     }
 
-    private function checkForNewEpisodes(PodcastSubscription $subscription, SpotifyService $spotifyService): void
+    private function checkForNewEpisodes(string $podcastindex_podcast_id, PodcastIndexService $podcastIndexService): void
     {
         try {
-            $episodes = $spotifyService->getShowEpisodes($subscription->show_id, 5, 0);
-            
+            $episodes = $podcastIndexService->getEpisodesByFeedId($podcastindex_podcast_id, 5);
             if (!isset($episodes['items'])) {
                 return;
             }
-
             $latestEpisode = $episodes['items'][0] ?? null;
             if (!$latestEpisode) {
                 return;
             }
-
-            $releaseDate = $latestEpisode['release_date'];
+            $releaseDate = $latestEpisode['datePublished'] ?? $latestEpisode['datePublishedPretty'] ?? null;
             $oneDayAgo = now()->subDay();
-
-            // Check if episode was released in the last 24 hours
-            if (strtotime($releaseDate) > $oneDayAgo->timestamp) {
-                $this->createNewEpisodeNotifications($subscription, $latestEpisode);
+            if ($releaseDate && strtotime($releaseDate) > $oneDayAgo->timestamp) {
+                $this->createNewEpisodeNotifications($podcastindex_podcast_id, $latestEpisode);
             }
         } catch (\Exception $e) {
-            Log::warning("Failed to check episodes for show {$subscription->show_id}: " . $e->getMessage());
+            Log::warning("Failed to check episodes for podcast {$podcastindex_podcast_id}: " . $e->getMessage());
         }
     }
 
-    private function createNewEpisodeNotifications(PodcastSubscription $subscription, array $episode): void
+    private function createNewEpisodeNotifications(string $podcastindex_podcast_id, array $episode): void
     {
-        $userIds = PodcastSubscription::where('show_id', $subscription->show_id)
-            ->where('is_active', true)
-            ->where('notify_new_episodes', true)
+        $userIds = Subscription::where('podcastindex_podcast_id', $podcastindex_podcast_id)
             ->pluck('user_id');
-
         foreach ($userIds as $userId) {
-            // Check if notification already exists
-            $exists = PodcastNotification::where('user_id', $userId)
-                ->where('episode_id', $episode['id'])
+            $exists = Notification::where('user_id', $userId)
+                ->where('podcastindex_episode_id', $episode['id'])
                 ->where('type', 'new_episode')
                 ->exists();
-
             if (!$exists) {
-                PodcastNotification::create([
+                Notification::create([
                     'user_id' => $userId,
                     'type' => 'new_episode',
                     'title' => 'New Episode Available',
-                    'message' => "New episode '{$episode['name']}' from {$subscription->show_name}",
+                    'message' => "A new episode '{$episode['title']}' is available!",
                     'data' => [
                         'episode' => $episode,
-                        'show_id' => $subscription->show_id
+                        'podcastindex_podcast_id' => $podcastindex_podcast_id
                     ],
-                    'show_id' => $subscription->show_id,
-                    'episode_id' => $episode['id'],
+                    'podcastindex_podcast_id' => $podcastindex_podcast_id,
+                    'podcastindex_episode_id' => $episode['id'],
                     'is_read' => false
                 ]);
             }
